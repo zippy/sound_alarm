@@ -62,8 +62,8 @@ public:
 
 Alarm::Alarm() {
   auto_adjust = true;
-  setRange(800,0);
-  setThreshold(400);
+  setRange(850,0);
+  setThreshold(500);
   period = SECOND*1;
   reset_period = SECOND*10;
   alarm_percent = 40;
@@ -102,8 +102,8 @@ Alarm a;
 const int setup_params = 7;
 #define LEVEL_PARAM 0
 #define PERIOD_PARAM 1
-#define RESET_PARAM 2
-#define PERCENT_PARAM 3
+#define PERCENT_PARAM 2
+#define RESET_PARAM 3
 #define AUTO_LEVEL_PARAM 4
 #define AUTO_ADJUST_PARAM 5
 #define CALIBRATE_RANGE_PARAM 6
@@ -201,7 +201,7 @@ PercentParam percent_p;
 AutoLevelParam auto_level_p;
 AutoAdjustParam auto_adjust_p;
 CalibrateRangeParam calibrate_range_p;
-Param* params[] = {&level_p,&period_p,&reset_p,&percent_p,&auto_level_p,&auto_adjust_p,&calibrate_range_p};
+Param* params[] = {&level_p,&period_p,&percent_p,&reset_p,&auto_level_p,&auto_adjust_p,&calibrate_range_p};
 
 //*******************************
 

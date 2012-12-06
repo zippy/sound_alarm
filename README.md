@@ -27,8 +27,8 @@ When you hold down the button for more the a second while in Normal Mode, the ar
 
 + "Level-M" is for manual configuration of the sound level that triggers the alarm.  (Use Level-A to auto-configure the level value).
 + "Period" is the number of seconds that arduino samples sound.  Rotate the setup-pot to set the value.
-+ "Alarm Reset" is the number of seconds after which the alarm should be reset when activated.  Rotate the setup pot to set the value.
 + "Percent" is the percentage of time during the period that the sound must be above the threshold to trigger the alarm.  Rotate the setup-pot to set the value.
++ "Alarm Reset" is the number of seconds after which the alarm should be reset when activated.  Rotate the setup pot to set the value.
 + "Level-A" is for auto configuration of the sound level that triggers the alarm.  When auto-configuring the level, simply press the button when the level of noise is present which should trigger the alarm.
 + "Auto Range" is a boolean as to whether auto ranging is turned on or off.  When auto-ranging is on, the actual maximum and minimum voltage levels sensed by the system while in Normal Mode will adjust the range used in the level meter
 + "Calibrate Range" allows you to calibrate the voltage range that marks the top and bottom of the level meter based on actual sound inputs.
