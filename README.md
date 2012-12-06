@@ -4,6 +4,9 @@ This project monitors a voltage source hooked to a sound level circuit, and trig
 
 The project includes an LCD display which shows the current sound level, and is used to configure the various parameters.  Additionally the project sends IR commands when the alarm is triggered to activate an external alarm.
 
+See http://www.youtube.com/watch?v=ZhZH9_8INj4 for a video demo of the completed project.
+See http://eric.harris-braun.com/blog/2012/12/05/id-240 for blog post on assembly.
+
 ## Installation
 
 The project depends on these libraries which you have to install your libraries folder for this sketch to compile:
