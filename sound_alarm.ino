@@ -167,9 +167,9 @@ class PeriodParam : public Param {
     p =  a.period/1000;
     Serial.print("Period: ");Serial.println(p);
     lcd.setCursor(0,1);
-    lcd.print("Period: ");lcd.print(p);lcd.print("    ");
+    lcd.print("Period: ");lcd.print(p);lcd.print("      ");
   };
-  int updateValue(int val) {a.period = map(val,0,1023,0,30000);return a.period;};
+  int updateValue(int val) {a.period = map(val,0,1023,1000,30000);return a.period;};
 };
 
 class ResetParam : public Param {
@@ -181,7 +181,7 @@ class ResetParam : public Param {
     lcd.setCursor(0,1);
     lcd.print("Alarm Reset: ");lcd.print(p);lcd.print("    ");
   };
-  int updateValue(int val) {a.reset_period = map(val,0,1023,0,30000);return a.reset_period;};
+  int updateValue(int val) {a.reset_period = map(val,0,1023,1000,30000);return a.reset_period;};
 };
 
 class PercentParam : public Param {
@@ -189,7 +189,7 @@ class PercentParam : public Param {
   void display(int ctx) {
     Serial.print("Percent: ");Serial.println(a.alarm_percent);
     lcd.setCursor(0,1);
-    lcd.print("Percent: ");lcd.print(a.alarm_percent);lcd.print("    ");
+    lcd.print("Percent: ");lcd.print(a.alarm_percent);lcd.print("      ");
   };
   int updateValue(int val) {a.alarm_percent = map(val,0,1023,0,100);return a.alarm_percent;};
 };
@@ -310,44 +310,90 @@ void doNormalState() {
 
 //************************************************************
 // Setup Mode functions
+unsigned long pv;
+int count;
+
+void initializeParamPot() {
+  pv = 0;
+  count = 0;
+}
+
+#define INITIALIZING 0
+#define CHANGED 1
+#define SAME 2
+
+int readParamPot(unsigned int &cur_val)
+{
+  unsigned int p = analogRead(potPin);
+  boolean value_changed = false;
+  if (count < 1000) {
+    pv += p;
+    count++;
+    cur_val = 0;
+    return INITIALIZING;
+  }
+  else {
+    unsigned int avg = pv/count;
+    debug.msg("pv:",pv);
+    debug.msg("p:",p);
+    debug.msg("count:",count);
+    debug.msg("avg:",avg);
+
+    if (p != avg) {
+      value_changed = true;
+    }
+    cur_val = avg;
+    count = count/2;
+    pv = pv/2;
+  }
+  return value_changed ? CHANGED : SAME;
+}
+
 
 int setup_param;
 void setSetupState(int p) {
   setup_param = p;
   lcd.clear();
-  lcd_println("Longpress to set");
-  params[setup_param]->display(VIEW);
+  displaySetupParam();
   setState(SETUP_STATE);
 }
 
+void displaySetupParam() {
+  lcd.setCursor(0,0);
+  for (int i=0; i<setup_params; i++) {
+    lcd.print(i == setup_param ? '+' : '-');
+  }
+  lcd.setCursor(0,1);
+  params[setup_param]->display(VIEW);
+}
+
 void doSetupState() {
-  if (longPress()) {
+  if (shortPress()) {
     lcd.clear();
     Serial.println("--Setting--");
     lcd_println("--Setting--");
     params[setup_param]->set();
   }
-  else if (shortPress()) {
-    setup_param++;
-    if (setup_param >= setup_params) {
-      setNormalState();
-    }
-    else {
-      lcd.setCursor(0,1);
-      params[setup_param]->display(VIEW);
+  else if (longPress()) {
+    setNormalState();
+  }
+  else {
+    unsigned int val;
+    int result = readParamPot(val);
+    if (result == CHANGED) {
+      setup_param = map(val, 0, 1023, 0, setup_params);
+      displaySetupParam();
     }
   }
 }
 
+
 //************************************************************
 // Get param mode functions
 
-unsigned long pv;
-int count;
 void setGetParamState() {
   setState(GET_PARAM_STATE);
-  pv = 0;
-  count = 0;
+  initializeParamPot();
 }
 
 void doGetParamState() {
@@ -355,24 +401,14 @@ void doGetParamState() {
     setSetupState(setup_param);
   }
   else {
-    unsigned int p = analogRead(potPin);
-    
-    if (count < 1000) {
-      pv += p;
-      count++;
-    }
-    else {
-      unsigned int avg = pv/count;
-      debug.msg("pv:",pv);
-      debug.msg("p:",p);
-      debug.msg("count:",count);
-      debug.msg("avg:",avg);
-      params[setup_param]->updateValue(avg);
-      if (p != avg) {
+    unsigned int val;
+    int result = readParamPot(val);
+    if (result != INITIALIZING) {
+      params[setup_param]->updateValue(val);
+      if (result == CHANGED) {
+        debug.msg("val:",val);
         params[setup_param]->display(SET);
       }
-      count = count/2;
-      pv = pv/2;
     }
   }
 }
@@ -428,6 +464,10 @@ void doCalRangeState() {
     }
     if (s > a.range_high) {
       a.setRange(s,a.range_low);
+      lcd.setCursor(0,1);
+      lcd.print("High: ");
+      lcd.print(a.range_high);
+      lcd.setCursor(0,0);
     }
     displayLevel(s);
   }
